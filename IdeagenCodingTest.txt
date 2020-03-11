@@ -1,0 +1,87 @@
+public static double Calculate(string sum)
+{
+	var arrSum = sum.Split(' ');
+
+	double val = 0;
+
+	if (sum.Contains("("))
+	{
+		var openB = arrSum.Select((x, i) => new { idx = i, val = x }).Where(x => x.val == "(").Select(x => x.idx).Min();
+		var closeB = arrSum.Select((x, i) => new { idx = i, val = x }).Where(x => x.val == ")").Select(x => x.idx).Max();
+		var openBSum = sum.IndexOf("(");
+		var closeBSum = sum.LastIndexOf(")");
+		var expr = sum.Substring(openBSum + 1, closeBSum - openBSum - 1);
+		
+		var bList = arrSum.ToList();
+		bList.RemoveRange(openB, (closeB - openB));
+
+		val = Calculate(expr);
+
+		arrSum = bList.ToArray();
+		arrSum[openB] = val.ToString();
+	}
+
+	var mdOperators = arrSum.Select((x, i) => new { idx = i, val = x }).Where(x => x.val == "*" || x.val == "/").Select(x => x.idx);
+
+	if (mdOperators.Count() > 0)
+	{
+		foreach (int i in mdOperators)
+		{
+			if (arrSum[i] == "/")
+			{
+				var a = decimal.Parse(arrSum[i - 1]);
+				var b = decimal.Parse(arrSum[i + 1]);
+
+				var result = double.Parse((a / b).ToString());
+				val = result;
+
+				arrSum[i - 1] = result.ToString();
+				arrSum[i + 1] = result.ToString();
+			}
+			else if (arrSum[i] == "*")
+			{
+				var a = decimal.Parse(arrSum[i - 1]);
+				var b = decimal.Parse(arrSum[i + 1]);
+
+				var result = double.Parse((a * b).ToString());
+				val = result;
+
+				arrSum[i - 1] = result.ToString();
+				arrSum[i + 1] = result.ToString();
+			}
+		}
+	}
+
+	var pmOperators = arrSum.Select((x, i) => new { idx = i, val = x }).Where(x => x.val == "+" || x.val == "-").Select(x => x.idx);
+
+	if (pmOperators.Count() > 0)
+	{
+		foreach (int i in pmOperators)
+		{
+			if (arrSum[i] == "+")
+			{
+				var a = decimal.Parse(arrSum[i - 1]);
+				var b = decimal.Parse(arrSum[i + 1]);
+
+				var result = double.Parse((a + b).ToString());
+				val = result;
+
+				arrSum[i - 1] = result.ToString();
+				arrSum[i + 1] = result.ToString();
+			}
+			else if (arrSum[i] == "-")
+			{
+				var a = decimal.Parse(arrSum[i - 1]);
+				var b = decimal.Parse(arrSum[i + 1]);
+
+				var result = double.Parse((a - b).ToString());
+				val = result;
+
+				arrSum[i - 1] = result.ToString();
+				arrSum[i + 1] = result.ToString();
+			}
+		}
+	}
+
+	return val;
+}
